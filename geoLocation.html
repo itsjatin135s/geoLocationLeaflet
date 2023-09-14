@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Geolocation and Map Pin Integration</title>
+  <!-- Include Leaflet CSS and JavaScript -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <style>
+    /* Style the map container */
+    #map-container {
+      height: 600px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Geolocation and Map { LAT, LONG } Integration</h1>
+  <p>Click the button below to obtain your current location.</p>
+  <button id="getLocationButton" style="margin-bottom: 10px">Get My Location</button>
+
+  <!-- Create a container for the map -->
+  <div id="map-container"></div>
+
+  <script>
+    // Initialize the map
+    const map = L.map("map-container").setView([0, 0], 2);
+
+    // Add a tile layer (in this example, using OpenStreetMap)
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+
+    // Initialize a marker with initial position and draggable option
+    const marker = L.marker([0, 0], { draggable: true }).addTo(map);
+
+    // Function to handle geolocation success
+    function onGeolocationSuccess(position) {
+      const latitude = position.coords.latitude;
+      const longitude = position.coords.longitude;
+      console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
+
+      // Update the map with the obtained coordinates
+      map.setView([latitude, longitude], 13);
+
+      // Set the marker's initial position
+      marker.setLatLng([latitude, longitude]);
+
+      // Add a drag event listener to the marker
+      marker.on("dragend", onMarkerDragEnd);
+    }
+
+    // Function to handle geolocation error
+    function onGeolocationError(error) {
+      console.error(`Geolocation error: ${error.message}`);
+    }
+
+    // Function to handle marker dragend event
+    function onMarkerDragEnd(event) {
+      const position = event.target.getLatLng();
+      console.log(`New marker position: ${position.lat}, ${position.lng}`);
+    }
+
+    // Add a click event listener to the "Get My Location" button
+    document.getElementById("getLocationButton").addEventListener("click", () => {
+      if ("geolocation" in navigator) {
+        // Request geolocation
+        navigator.geolocation.getCurrentPosition(onGeolocationSuccess, onGeolocationError, {
+          enableHighAccuracy: true,
+          timeout: 10000 // 10 seconds
+        });
+      } else {
+        console.error("Geolocation is not supported in this browser.");
+      }
+    });
+  </script>
+</body>
+</html>
